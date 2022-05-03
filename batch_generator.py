@@ -50,7 +50,7 @@ class BatchGenerator(object):
 
     @staticmethod
     def load_dataset():
-        dataset = np.load(os.path.join('data', 'dataset.npy'))
+        dataset = np.load(os.path.join('data', 'dataset.npy'), allow_pickle=True)
         dataset = [np.array(d) for d in dataset]
         temp = []
         for d in dataset:
@@ -60,7 +60,7 @@ class BatchGenerator(object):
             temp += [np.concatenate([[[0., 0., 1.]], np.concatenate([offs, ends[:, None]], axis=1)], axis=0)]
         # because lines are of different length, we store them in python array (not numpy)
         dataset = temp
-        labels = np.load(os.path.join('data', 'labels.npy'))
+        labels = np.load(os.path.join('data', 'labels.npy'), allow_pickle=True)
         with open(os.path.join('data', 'translation.pkl'), 'rb') as file:
             translation = pickle.load(file)
 

@@ -7,8 +7,8 @@ from collections import namedtuple
 from utils import next_experiment_path
 from batch_generator import BatchGenerator
 
-
 # TODO: add help info
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--seq_len', dest='seq_len', default=256, type=int)
 parser.add_argument('--batch_size', dest='batch_size', default=64, type=int)
@@ -22,6 +22,8 @@ args = parser.parse_args()
 
 epsilon = 1e-8
 
+tf.compat.v1.disable_v2_behavior()
+
 
 class WindowLayer(object):
     def __init__(self, num_mixtures, sequence, num_letters):
@@ -33,25 +35,31 @@ class WindowLayer(object):
                                        axis=0)
 
     def __call__(self, inputs, k, reuse=None):
-        with tf.variable_scope('window', reuse=reuse):
-            alpha = tf.layers.dense(inputs, self.num_mixtures, activation=tf.exp,
-                                    kernel_initializer=tf.truncated_normal_initializer(stddev=0.075), name='alpha')
-            beta = tf.layers.dense(inputs, self.num_mixtures, activation=tf.exp,
-                                   kernel_initializer=tf.truncated_normal_initializer(stddev=0.075), name='beta')
-            kappa = tf.layers.dense(inputs, self.num_mixtures, activation=tf.exp,
-                                    kernel_initializer=tf.truncated_normal_initializer(stddev=0.075), name='kappa')
+        with tf.compat.v1.variable_scope('window', reuse=reuse):
+            alpha = tf.compat.v1.layers.dense(inputs, self.num_mixtures, activation=tf.exp,
+                                              kernel_initializer=tf.compat.v1.truncated_normal_initializer(
+                                                  stddev=0.075), name='alpha')
+            beta = tf.compat.v1.layers.dense(inputs, self.num_mixtures, activation=tf.exp,
+                                             kernel_initializer=tf.compat.v1.truncated_normal_initializer(stddev=0.075),
+                                             name='beta')
+            kappa = tf.compat.v1.layers.dense(inputs, self.num_mixtures, activation=tf.exp,
+                                              kernel_initializer=tf.compat.v1.truncated_normal_initializer(
+                                                  stddev=0.075), name='kappa')
 
             a = tf.expand_dims(alpha, axis=2)
             b = tf.expand_dims(beta, axis=2)
             k = tf.expand_dims(k + kappa, axis=2)
 
-            phi = tf.exp(-np.square(self.u_range + k) * b) * a  # [batch_size, mixtures, length]
-            phi = tf.reduce_sum(phi, axis=1, keep_dims=True)  # [batch_size, 1, length]
+            phi = tf.exp(-tf.math.square(self.u_range + k) * b) * a  # [batch_size, mixtures, length]
+            phi = tf.reduce_sum(phi, axis=1, keepdims=True)  # [batch_size, 1, length]
 
             # whether or not network finished generating sequence
             finish = tf.cast(phi[:, 0, -1] > tf.reduce_max(phi[:, 0, :-1], axis=1), tf.float32)
+            window = tf.matmul(phi, self.sequence)
+            if window.get_shape().as_list() == [None, 1, 80]:
+                window = tf.reshape(window, (1, 1, 80))
 
-            return tf.squeeze(tf.matmul(phi, self.sequence), axis=1), \
+            return tf.squeeze(window, axis=1), \
                    tf.squeeze(k, axis=2), \
                    tf.squeeze(phi, axis=1), \
                    tf.expand_dims(finish, axis=1)
@@ -68,21 +76,28 @@ class MixtureLayer(object):
         self.num_mixtures = num_mixtures
 
     def __call__(self, inputs, bias=0., reuse=None):
-        with tf.variable_scope('mixture_output', reuse=reuse):
-            e = tf.layers.dense(inputs, 1,
-                                kernel_initializer=tf.truncated_normal_initializer(stddev=0.075), name='e')
-            pi = tf.layers.dense(inputs, self.num_mixtures,
-                                 kernel_initializer=tf.truncated_normal_initializer(stddev=0.075), name='pi')
-            mu1 = tf.layers.dense(inputs, self.num_mixtures,
-                                  kernel_initializer=tf.truncated_normal_initializer(stddev=0.075), name='mu1')
-            mu2 = tf.layers.dense(inputs, self.num_mixtures,
-                                  kernel_initializer=tf.truncated_normal_initializer(stddev=0.075), name='mu2')
-            std1 = tf.layers.dense(inputs, self.num_mixtures,
-                                   kernel_initializer=tf.truncated_normal_initializer(stddev=0.075), name='std1')
-            std2 = tf.layers.dense(inputs, self.num_mixtures,
-                                   kernel_initializer=tf.truncated_normal_initializer(stddev=0.075), name='std2')
-            rho = tf.layers.dense(inputs, self.num_mixtures,
-                                  kernel_initializer=tf.truncated_normal_initializer(stddev=0.075), name='rho')
+        with tf.compat.v1.variable_scope('mixture_output', reuse=reuse):
+            e = tf.compat.v1.layers.dense(inputs, 1,
+                                          kernel_initializer=tf.compat.v1.truncated_normal_initializer(stddev=0.075),
+                                          name='e')
+            pi = tf.compat.v1.layers.dense(inputs, self.num_mixtures,
+                                           kernel_initializer=tf.compat.v1.truncated_normal_initializer(stddev=0.075),
+                                           name='pi')
+            mu1 = tf.compat.v1.layers.dense(inputs, self.num_mixtures,
+                                            kernel_initializer=tf.compat.v1.truncated_normal_initializer(stddev=0.075),
+                                            name='mu1')
+            mu2 = tf.compat.v1.layers.dense(inputs, self.num_mixtures,
+                                            kernel_initializer=tf.compat.v1.truncated_normal_initializer(stddev=0.075),
+                                            name='mu2')
+            std1 = tf.compat.v1.layers.dense(inputs, self.num_mixtures,
+                                             kernel_initializer=tf.compat.v1.truncated_normal_initializer(stddev=0.075),
+                                             name='std1')
+            std2 = tf.compat.v1.layers.dense(inputs, self.num_mixtures,
+                                             kernel_initializer=tf.compat.v1.truncated_normal_initializer(stddev=0.075),
+                                             name='std2')
+            rho = tf.compat.v1.layers.dense(inputs, self.num_mixtures,
+                                            kernel_initializer=tf.compat.v1.truncated_normal_initializer(stddev=0.075),
+                                            name='rho')
 
             return tf.nn.sigmoid(e), \
                    tf.nn.softmax(pi * (1. + bias)), \
@@ -91,7 +106,7 @@ class MixtureLayer(object):
                    tf.nn.tanh(rho)
 
 
-class RNNModel(tf.nn.rnn_cell.RNNCell):
+class RNNModel(tf.compat.v1.nn.rnn_cell.RNNCell):
     def __init__(self, layers, num_units, input_size, num_letters, batch_size, window_layer):
         super(RNNModel, self).__init__()
         self.layers = layers
@@ -101,8 +116,8 @@ class RNNModel(tf.nn.rnn_cell.RNNCell):
         self.window_layer = window_layer
         self.last_phi = None
 
-        with tf.variable_scope('rnn', reuse=None):
-            self.lstms = [tf.nn.rnn_cell.LSTMCell(num_units)
+        with tf.compat.v1.variable_scope('rnn', reuse=None):
+            self.lstms = [tf.compat.v1.nn.rnn_cell.LSTMCell(num_units)
                           for _ in range(layers)]
             self.states = [tf.Variable(tf.zeros([batch_size, s]), trainable=False)
                            for s in self.state_size]
@@ -131,9 +146,9 @@ class RNNModel(tf.nn.rnn_cell.RNNCell):
 
         for layer in range(self.layers):
             x = tf.concat([inputs, window] + prev_output, axis=1)
-            with tf.variable_scope('lstm_{}'.format(layer)):
-                output, s = self.lstms[layer](x, tf.nn.rnn_cell.LSTMStateTuple(state[2 * layer],
-                                                                               state[2 * layer + 1]))
+            with tf.compat.v1.variable_scope('lstm_{}'.format(layer)):
+                output, s = self.lstms[layer](x, tf.compat.v1.nn.rnn_cell.LSTMStateTuple(state[2 * layer],
+                                                                                         state[2 * layer + 1]))
                 prev_output = [output]
             output_state += [*s]
 
@@ -148,10 +163,10 @@ def create_graph(num_letters, batch_size,
                  window_mixtures=10, output_mixtures=20):
     graph = tf.Graph()
     with graph.as_default():
-        coordinates = tf.placeholder(tf.float32, shape=[None, None, 3])
-        sequence = tf.placeholder(tf.float32, shape=[None, None, num_letters])
-        reset = tf.placeholder(tf.float32, shape=[None, 1])
-        bias = tf.placeholder_with_default(tf.zeros(shape=[]), shape=[])
+        coordinates = tf.compat.v1.placeholder(tf.float32, shape=[None, None, 3])
+        sequence = tf.compat.v1.placeholder(tf.float32, shape=[None, None, num_letters])
+        reset = tf.compat.v1.placeholder(tf.float32, shape=[None, 1])
+        bias = tf.compat.v1.placeholder_with_default(tf.zeros(shape=[]), shape=[])
 
         def create_model(generate=None):
             in_coords = coordinates[:, :-1, :]
@@ -161,7 +176,7 @@ def create_graph(num_letters, batch_size,
             if generate:
                 in_coords = coordinates
 
-            with tf.variable_scope('model', reuse=generate):
+            with tf.compat.v1.variable_scope('model', reuse=generate):
                 window = WindowLayer(num_mixtures=window_mixtures, sequence=sequence, num_letters=num_letters)
 
                 rnn_model = RNNModel(layers=lstm_layers, num_units=num_units,
@@ -171,8 +186,8 @@ def create_graph(num_letters, batch_size,
                 reset_states = tf.group(*[state.assign(state * reset)
                                           for state in rnn_model.states])
 
-                outs, states = tf.nn.dynamic_rnn(rnn_model, in_coords,
-                                                 initial_state=rnn_model.states)
+                outs, states = tf.compat.v1.nn.dynamic_rnn(rnn_model, in_coords,
+                                                           initial_state=rnn_model.states)
 
                 output_layer = MixtureLayer(input_size=num_units, output_size=2,
                                             num_mixtures=output_mixtures)
@@ -194,7 +209,7 @@ def create_graph(num_letters, batch_size,
                         ep = es * e + (1. - es) * (1. - e)
                         rp = tf.reduce_sum(pi * n, axis=1)
 
-                        loss = tf.reduce_mean(-tf.log(rp + epsilon) - tf.log(ep + epsilon))
+                        loss = tf.reduce_mean(-tf.compat.v1.log(rp + epsilon) - tf.compat.v1.log(ep + epsilon))
 
                     if generate:
                         # save params for easier model loading and prediction
@@ -210,28 +225,29 @@ def create_graph(num_letters, batch_size,
                                       ('kappa', rnn_model.states[-2]),
                                       ('finish', rnn_model.states[-1]),
                                       ('zero_states', rnn_model.zero_states)]:
-                            tf.add_to_collection(*param)
+                            tf.compat.v1.add_to_collection(*param)
 
                 with tf.name_scope('training'):
                     steps = tf.Variable(0.)
-                    learning_rate = tf.train.exponential_decay(0.001, steps, staircase=True,
-                                                               decay_steps=10000, decay_rate=0.5)
+                    learning_rate = tf.compat.v1.train.exponential_decay(0.001, steps, staircase=True,
+                                                                         decay_steps=10000, decay_rate=0.5)
 
-                    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+                    optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=learning_rate)
                     grad, var = zip(*optimizer.compute_gradients(loss))
                     grad, _ = tf.clip_by_global_norm(grad, 3.)
                     train_step = optimizer.apply_gradients(zip(grad, var), global_step=steps)
 
                 with tf.name_scope('summary'):
                     # TODO: add more summaries
-                    summary = tf.summary.merge([
-                        tf.summary.scalar('loss', loss)
+                    summary = tf.compat.v1.summary.merge([
+                        tf.compat.v1.summary.scalar('loss', loss)
                     ])
 
                 return namedtuple('Model', ['coordinates', 'sequence', 'reset_states', 'reset', 'loss', 'train_step',
                                             'learning_rate', 'summary'])(
-                           coordinates, sequence, reset_states, reset, loss, train_step, learning_rate, summary
-                       )
+                    coordinates, sequence, reset_states, reset, loss, train_step, learning_rate, summary
+                )
+
         train_model = create_model(generate=None)
         _ = create_model(generate=True)  # just to create ops for generation
 
@@ -251,20 +267,20 @@ def main():
                          window_mixtures=args.window_mixtures,
                          output_mixtures=args.output_mixtures)
 
-    with tf.Session(graph=g) as sess:
-        model_saver = tf.train.Saver(max_to_keep=2)
+    with tf.compat.v1.Session(graph=g) as sess:
+        model_saver = tf.compat.v1.train.Saver(max_to_keep=2)
         if restore_model:
             model_file = tf.train.latest_checkpoint(os.path.join(restore_model, 'models'))
             experiment_path = restore_model
             epoch = int(model_file.split('-')[-1]) + 1
             model_saver.restore(sess, model_file)
         else:
-            sess.run(tf.global_variables_initializer())
+            sess.run(tf.compat.v1.global_variables_initializer())
             experiment_path = next_experiment_path()
             epoch = 0
 
-        summary_writer = tf.summary.FileWriter(experiment_path, graph=g, flush_secs=10)
-        summary_writer.add_session_log(tf.SessionLog(status=tf.SessionLog.START),
+        summary_writer = tf.compat.v1.summary.FileWriter(experiment_path, graph=g, flush_secs=10)
+        summary_writer.add_session_log(tf.compat.v1.SessionLog(status=tf.compat.v1.SessionLog.START),
                                        global_step=epoch * batches_per_epoch)
 
         for e in range(epoch, num_epoch):

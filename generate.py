@@ -2,13 +2,15 @@ import os
 import pickle
 import argparse
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.mlab as mlab
 from matplotlib import animation
 import seaborn
 from collections import namedtuple
+
+tf.disable_v2_behavior()
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--model', dest='model_path', type=str, default=os.path.join('pretrained', 'model-29'))
@@ -20,6 +22,23 @@ parser.add_argument('--animation', dest='animation', action='store_true', defaul
 parser.add_argument('--noinfo', dest='info', action='store_false', default=True)
 parser.add_argument('--save', dest='save', type=str, default=None)
 args = parser.parse_args()
+
+
+def bivariate_normal(X, Y, sigmax=1.0, sigmay=1.0,
+                     mux=0.0, muy=0.0, sigmaxy=0.0):
+    """
+    Bivariate Gaussian distribution for equal shape *X*, *Y*.
+    See `bivariate normal
+    <http://mathworld.wolfram.com/BivariateNormalDistribution.html>`_
+    at mathworld.
+    """
+    Xmu = X - mux
+    Ymu = Y - muy
+
+    rho = sigmaxy / (sigmax * sigmay)
+    z = Xmu ** 2 / sigmax ** 2 + Ymu ** 2 / sigmay ** 2 - 2 * rho * Xmu * Ymu / (sigmax * sigmay)
+    denom = 2 * np.pi * sigmax * sigmay * np.sqrt(1 - rho ** 2)
+    return np.exp(-z / (2 * (1 - rho ** 2))) / denom
 
 
 def sample(e, mu1, mu2, std1, std2, rho):
@@ -68,8 +87,8 @@ def sample_text(sess, args_text, translation, style=None):
         prime_len = len(style_coords)
         style_len = len(style_text)
         prime_coords = list(style_coords)
-        coord = prime_coords[0] # Set the first pen stroke as the first element to process
-        text = np.r_[style_text, text] # concatenate on 1 axis the prime text + synthesis character sequence
+        coord = prime_coords[0]  # Set the first pen stroke as the first element to process
+        text = np.r_[style_text, text]  # concatenate on 1 axis the prime text + synthesis character sequence
         sequence_prime = np.eye(len(translation), dtype=np.float32)[style_text]
         sequence_prime = np.expand_dims(np.concatenate([sequence_prime, np.zeros((1, len(translation)))]), axis=0)
 
@@ -126,10 +145,10 @@ def main():
     charset = [rev_translation[i] for i in range(len(rev_translation))]
     charset[0] = ''
 
-    config = tf.ConfigProto(
+    config = tf.compat.v1.ConfigProto(
         device_count={'GPU': 0}
     )
-    with tf.Session(config=config) as sess:
+    with tf.compat.v1.Session(config=config) as sess:
         saver = tf.train.import_meta_graph(args.model_path + '.meta')
         saver.restore(sess, args.model_path)
 
@@ -165,9 +184,9 @@ def main():
                 x_grid, y_grid = np.meshgrid(x, y)
                 z_grid = np.zeros_like(x_grid)
                 for i in range(strokes.shape[0]):
-                    gauss = mlab.bivariate_normal(x_grid, y_grid, mux=strokes[i, 0], muy=strokes[i, 1],
-                                                  sigmax=strokes[i, 2], sigmay=strokes[i, 3],
-                                                  sigmaxy=0.)  # strokes[i, 4]
+                    gauss = bivariate_normal(x_grid, y_grid, mux=strokes[i, 0], muy=strokes[i, 1],
+                                             sigmax=strokes[i, 2], sigmay=strokes[i, 3],
+                                             sigmaxy=0.)  # strokes[i, 4]
                     z_grid += gauss * np.power(strokes[i, 2] + strokes[i, 3], 0.4) / (np.max(gauss) + epsilon)
 
                 fig, ax = plt.subplots(2, 2)
@@ -221,7 +240,7 @@ def main():
                 sumed = cumsum(coords)
 
                 def _update(i):
-                    c1, c2 = sumed[i: i+2]
+                    c1, c2 = sumed[i: i + 2]
                     fig.canvas.restore_region(background)
                     if c1[2] == 1. and c2[2] == 1.:
                         line, = ax.plot([c2[0], c2[0]], [-c2[1], -c2[1]])

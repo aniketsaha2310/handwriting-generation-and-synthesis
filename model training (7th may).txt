@@ -1,0 +1,112 @@
+PS C:\Users\Aniket\Desktop\MAJOR PROJECT\our repo\handwriting-generation-and-synthesis> python train.py --batch_size=128 --epochs=30 --units_per_layer=500
+WARNING:tensorflow:From C:\Users\Aniket\anaconda3\lib\site-packages\tensorflow\python\compat\v2_compat.py:107: disable_resource_variables (from tensorflow.python.ops.variable_scope) is de
+precated and will be removed in a future version.
+Instructions for updating:
+non-resource variables are not supported in the long term
+train.py:120: UserWarning: `tf.nn.rnn_cell.LSTMCell` is deprecated and will be removed in a future version. This class is equivalent as `tf.keras.layers.LSTMCell`, and will be replaced by
+ that in Tensorflow 2.0.
+  self.lstms = [tf.compat.v1.nn.rnn_cell.LSTMCell(num_units)
+WARNING:tensorflow:From train.py:189: dynamic_rnn (from tensorflow.python.ops.rnn) is deprecated and will be removed in a future version.
+Instructions for updating:
+Please use `keras.layers.RNN(cell)`, which is equivalent to this API
+C:\Users\Aniket\anaconda3\lib\site-packages\keras\layers\legacy_rnn\rnn_cell_impl.py:984: UserWarning: `layer.add_variable` is deprecated and will be removed in a future version. Please u
+se `layer.add_weight` method instead.
+  self._kernel = self.add_variable(
+WARNING:tensorflow:From C:\Users\Aniket\anaconda3\lib\site-packages\keras\layers\legacy_rnn\rnn_cell_impl.py:992: calling Zeros.__init__ (from tensorflow.python.ops.init_ops) with dtype i
+s deprecated and will be removed in a future version.
+Instructions for updating:
+Call initializer instance with the dtype argument instead of passing it to the constructor
+C:\Users\Aniket\anaconda3\lib\site-packages\keras\layers\legacy_rnn\rnn_cell_impl.py:993: UserWarning: `layer.add_variable` is deprecated and will be removed in a future version. Please u
+se `layer.add_weight` method instead.
+  self._bias = self.add_variable(
+C:\Users\Aniket\anaconda3\lib\site-packages\tensorflow\python\autograph\impl\api.py:458: UserWarning: `tf.layers.dense` is deprecated and will be removed in a future version. Please use `
+tf.keras.layers.Dense` instead.
+  return f(*args, **kwargs)
+C:\Users\Aniket\anaconda3\lib\site-packages\keras\legacy_tf_layers\core.py:261: UserWarning: `layer.apply` is deprecated and will be removed in a future version. Please use `layer.__call_
+_` method instead.
+  return layer.apply(inputs)
+train.py:80: UserWarning: `tf.layers.dense` is deprecated and will be removed in a future version. Please use `tf.keras.layers.Dense` instead.
+  e = tf.compat.v1.layers.dense(inputs, 1,
+train.py:83: UserWarning: `tf.layers.dense` is deprecated and will be removed in a future version. Please use `tf.keras.layers.Dense` instead.
+  pi = tf.compat.v1.layers.dense(inputs, self.num_mixtures,
+train.py:86: UserWarning: `tf.layers.dense` is deprecated and will be removed in a future version. Please use `tf.keras.layers.Dense` instead.
+  mu1 = tf.compat.v1.layers.dense(inputs, self.num_mixtures,
+train.py:89: UserWarning: `tf.layers.dense` is deprecated and will be removed in a future version. Please use `tf.keras.layers.Dense` instead.
+  mu2 = tf.compat.v1.layers.dense(inputs, self.num_mixtures,
+train.py:92: UserWarning: `tf.layers.dense` is deprecated and will be removed in a future version. Please use `tf.keras.layers.Dense` instead.
+  std1 = tf.compat.v1.layers.dense(inputs, self.num_mixtures,
+train.py:95: UserWarning: `tf.layers.dense` is deprecated and will be removed in a future version. Please use `tf.keras.layers.Dense` instead.
+  std2 = tf.compat.v1.layers.dense(inputs, self.num_mixtures,
+train.py:98: UserWarning: `tf.layers.dense` is deprecated and will be removed in a future version. Please use `tf.keras.layers.Dense` instead.
+  rho = tf.compat.v1.layers.dense(inputs, self.num_mixtures,
+2022-05-07 19:25:31.180276: I tensorflow/core/platform/cpu_feature_guard.cc:151] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following
+CPU instructions in performance-critical operations:  AVX AVX2
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2022-05-07 19:25:31.715832: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1525] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 3969 MB memory:  -> device: 0, name:
+NVIDIA GeForce RTX 2060, pci bus id: 0000:01:00.0, compute capability: 7.5
+
+Epoch 0
+[ 1000/ 1000] loss = -2.410248279571533768
+Epoch 1
+[ 1000/ 1000] loss = -2.55855464935302735
+Epoch 2
+[ 1000/ 1000] loss = -2.935476779937744WARNING:tensorflow:From C:\Users\Aniket\anaconda3\lib\site-packages\tensorflow\python\training\saver.py:1052: remove_checkpoint (from tensorflow.pyt
+hon.training.checkpoint_management) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use standard file APIs to delete files with this prefix.
+
+Epoch 3
+[ 1000/ 1000] loss = -3.2060661315917978
+Epoch 4
+[ 1000/ 1000] loss = -3.4368085861206055
+Epoch 5
+[ 1000/ 1000] loss = -3.1856238842010514
+Epoch 6
+[ 1000/ 1000] loss = -3.4616751670837402
+Epoch 7
+[ 1000/ 1000] loss = -3.4972679615020756
+Epoch 8
+[ 1000/ 1000] loss = -3.6081910133361816
+Epoch 9
+[ 1000/ 1000] loss = -3.7330257892608643
+Epoch 10
+[ 1000/ 1000] loss = -3.7220802307128906
+Epoch 11
+[ 1000/ 1000] loss = -3.7822256088256836
+Epoch 12
+[ 1000/ 1000] loss = -3.8015549182891846
+Epoch 13
+[ 1000/ 1000] loss = -3.9364004135131836
+Epoch 14
+[ 1000/ 1000] loss = -3.8800971508026123
+Epoch 15
+[ 1000/ 1000] loss = -3.9201519489288338
+Epoch 16
+[ 1000/ 1000] loss = -4.0008683204650886
+Epoch 17
+[ 1000/ 1000] loss = -3.9109492301940925
+Epoch 18
+[ 1000/ 1000] loss = -3.9342284202575684
+Epoch 19
+[ 1000/ 1000] loss = -4.0074987411499025
+Epoch 20
+[ 1000/ 1000] loss = -3.9605863094329834
+Epoch 21
+[ 1000/ 1000] loss = -3.9456124305725098
+Epoch 22
+[ 1000/ 1000] loss = -3.9792168140411377
+Epoch 23
+[ 1000/ 1000] loss = -4.1086802482604983
+Epoch 24
+[ 1000/ 1000] loss = -4.0346560478210455
+Epoch 25
+[ 1000/ 1000] loss = -4.0833587646484375
+Epoch 26
+[ 1000/ 1000] loss = -4.0694141387939455
+Epoch 27
+[ 1000/ 1000] loss = -4.0326128005981445
+Epoch 28
+[ 1000/ 1000] loss = -3.9504849910736084
+Epoch 29
+[ 1000/ 1000] loss = -4.1325340270996095
+PS C:\Users\Aniket\Desktop\MAJOR PROJECT\our repo\handwriting-generation-and-synthesis>

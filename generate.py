@@ -2,7 +2,7 @@ import os
 import pickle
 import argparse
 import numpy as np
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.mlab as mlab
@@ -10,7 +10,7 @@ from matplotlib import animation
 import seaborn
 from collections import namedtuple
 
-tf.disable_v2_behavior()
+tf.compat.v1.disable_v2_behavior()
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--model', dest='model_path', type=str, default=os.path.join('pretrained', 'model-29'))
@@ -71,7 +71,7 @@ def sample_text(sess, args_text, translation, style=None):
     fields = ['coordinates', 'sequence', 'bias', 'e', 'pi', 'mu1', 'mu2', 'std1', 'std2',
               'rho', 'window', 'kappa', 'phi', 'finish', 'zero_states']
     vs = namedtuple('Params', fields)(
-        *[tf.get_collection(name)[0] for name in fields]
+        *[tf.compat.v1.get_collection(name)[0] for name in fields]
     )
 
     text = np.array([translation.get(c, 0) for c in args_text])
@@ -149,7 +149,7 @@ def main():
         device_count={'GPU': 0}
     )
     with tf.compat.v1.Session(config=config) as sess:
-        saver = tf.train.import_meta_graph(args.model_path + '.meta')
+        saver = tf.compat.v1.train.import_meta_graph(args.model_path + '.meta')
         saver.restore(sess, args.model_path)
 
         while True:
@@ -197,7 +197,7 @@ def main():
                 ax[0, 0].set_aspect('equal')
 
                 for stroke in split_strokes(cumsum(np.array(coords))):
-                    ax[0, 1].plot(stroke[:, 0], -stroke[:, 1])
+                    ax[0, 1].plot(stroke[:, 0], -stroke[:, 1], color='black')
                 ax[0, 1].set_title('Handwriting')
                 ax[0, 1].set_aspect('equal')
 
@@ -219,7 +219,7 @@ def main():
             else:
                 fig, ax = plt.subplots(1, 1)
                 for stroke in split_strokes(cumsum(np.array(coords))):
-                    plt.plot(stroke[:, 0], -stroke[:, 1])
+                    plt.plot(stroke[:, 0], -stroke[:, 1], color='black')
                 ax.set_title('Handwriting')
                 ax.set_aspect('equal')
                 plt.show()

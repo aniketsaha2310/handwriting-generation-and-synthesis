@@ -7,7 +7,6 @@ from collections import namedtuple
 from utils import next_experiment_path
 from batch_generator import BatchGenerator
 
-# TODO: add help info
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--seq_len', dest='seq_len', default=256, type=int)
@@ -238,7 +237,6 @@ def create_graph(num_letters, batch_size,
                     train_step = optimizer.apply_gradients(zip(grad, var), global_step=steps)
 
                 with tf.name_scope('summary'):
-                    # TODO: add more summaries
                     summary = tf.compat.v1.summary.merge([
                         tf.compat.v1.summary.scalar('loss', loss)
                     ])

@@ -9,7 +9,7 @@ The goal of handwriting synthesis is to create artificial text that closely rese
 or preserves a user’s style, but it also has a number of other applications, such as improving text recognition systems, personalizing fonts, identifying writers, 
 and spreading as the technology gets more popular.  
 This project presents a deep learning model for synthesizing handwriting text from computer text input. 
-The goal is to create an AI tool that can generate handwriting while keeping a person’s style, which could potentially help people suffering with Dysgraphia. 
+The goal is to create an AI tool that can generate handwriting while keeping a person’s style, which could potentially help people suffering from Dysgraphia. 
 In addition, this paper compares our model to Alex Graves’ existing handwriting model. 
   
   

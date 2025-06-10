@@ -4,6 +4,12 @@
 *https://ieeexplore.ieee.org/document/9984450*  
 *https://ieeexplore.ieee.org/document/9776932*  
 
+Contributors/Authors of the project:
+- Aniket Kumar
+- Mehul Madaan
+- Shubham Kumar
+- Aniket Saha
+- Prof.(Dr.) Kirti Gupta (Project Mentor)
   
 Handwritten text has been a vital mode of communication and a cornerstone of our culture and education for decades, and it is frequently regarded as an art form.
 It’s been found to help in tasks like taking notes and reading while writing, as well as improving short and long-term memory. 
